@@ -34,6 +34,13 @@ return [
             'driver' => 'local',
             'root' => storage_path('app'),
         ],
+        
+        'my_files' => [
+            'driver' => 'local',
+            'root' => public_path().'/'
+        ],
+        
+
 
         'public' => [
             'driver' => 'local',
@@ -65,9 +72,11 @@ return [
     | the locations of the links and the values should be their targets.
     |
     */
+    
 
     'links' => [
         public_path('storage') => storage_path('app/public'),
     ],
+    
 
 ];

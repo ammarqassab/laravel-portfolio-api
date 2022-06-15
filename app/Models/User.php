@@ -17,11 +17,15 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
+    protected $guarded=[];
+    /*
     protected $fillable = [
-        'name',
+        'username',
         'email',
         'password',
+        'c_password'
     ];
+    */
 
     /**
      * The attributes that should be hidden for serialization.
@@ -41,4 +45,39 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+    Protected $appends=[
+        'profile_image_url',
+    ];
+    public function getProfileImageUrlAttribute()
+    {
+        if ($this->profile_image)
+        {
+            return asset('/uploads/profile_images/'.$this->profile_image);
+        }
+        else 
+        {
+            return 'https://ui-avatars.com/api/?background=random&name='.urldecode($this->name);
+        }
+    }
+    public function conversations()
+    {
+        return $this->belongsToMany(Conversation::class, 'participants')
+            ->latest('last_message_id')
+            ->withPivot([
+                'role', 'joined_at'
+            ]);
+    }
+
+    public function sentMessages()
+    {
+        return $this->hasMany(Message::class, 'user_id', 'id');
+    }
+
+    public function receivedMessages()
+    {
+        return $this->belongsToMany(Message::class, 'recipients')
+            ->withPivot([
+                'read_at', 'deleted_at',
+            ]);
+    }
 }
