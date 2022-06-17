@@ -6,34 +6,15 @@ use App\Models\Project;
 use App\Models\Image;
 use Illuminate\Http\Request;
 use App\Http\Controllers\BaseController as BaseController;
+use App\Traits\ImagesTrait;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+
 use File;
 class ProjectsController extends BaseController
-{
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-
-    //Show All Projects
-    public function index()
-    {
-        $Project= Project::with('images')->get();
-        if (is_null($Project)) {
-            return $this->sendError('Project not found');
-        }
-        return $this->sendResponse($Project,'aLL project');
-    }
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-
+{     
+    use ImagesTrait;
      //ADD PROJECT
     public function store(Request $request)
     {
@@ -46,12 +27,13 @@ class ProjectsController extends BaseController
             'name'=>'required',
             'type'=>'required',
             'link'=>'required',
+            'images'=>'required',
             'description'=>'required',
         ]);
-        
         if ($validator->fails()) {
             return $this->sendError('validate Error', $validator->errors());
         }
+
         $project=Project::create([
             'number'=>$request->number,
             'name'=>$request->name,
@@ -59,31 +41,23 @@ class ProjectsController extends BaseController
             'link'=>$request->link,
             'description'=>$request->description,
         ]);
-
-        if ($request->hasFile('images'))
-         {
-        $images = $request->file('images');
-        foreach ($images as $image) {
-        $image_name='project_image-'.time().'.'.$request->images;
-        $request->images->move(public_path('/upload/project_images'),$image_name);
-
-        Image::create([
-            'project_id'=>$project->id,
-            'path' =>$image_name,
-        ]);
+        if($request->file('images'))
+        {
+            $this->storeImages($project,$request->images);
         }
+        $project= Project::with('images')->find($project->id);
         return $this->sendResponse($project,'Added Project');
-
-}
     }
-                
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\cr  $cr
-     * @return \Illuminate\Http\Response
-     */
+    public function index()
+    {
+        $Project= Project::with('images')->get();
+        if (is_null($Project)) {
+            return $this->sendError('Project not found');
+        }
+        
+        return $this->sendResponse($Project,'aLL project');
+    }
 
     //Show ProjectID
     public function show($id)
@@ -94,13 +68,7 @@ class ProjectsController extends BaseController
         }  
         return $this->sendResponse($Project,'projectID');
     }
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\cr  $cr
-     * @return \Illuminate\Http\Response
-     */
+    
     public function update(Request $request,$id)
     {
         $project=Project::find($id);
@@ -118,25 +86,8 @@ class ProjectsController extends BaseController
             if ($validator->fails()) {
                 return $this->sendError('validation error', $validator->errors());
             }
-            /*
-            if ($request->hasFile('images')) {
-                $images = $request->file('images');
-                foreach ($images as $image) {
-                    if ($image->isValid())
-                     {
-                        $old_path=public_path().'/upload/public/images'. $project->images->name;
-                if(File::exists($old_path))
-                {
-                    File::delete($old_path);
-                }
-                        $image_name='project_image-'.time().'.'.$request->images->extension();
-                        $request->images->move_uploaded_file(public_path('/upload/project_images'),$image_name);
-                        $image=Image::create([
-                            'project_id'=>$project->id,
-                            'path' =>$image_name,
-                        ]);
-                    }}}
-                    */
+        
+
                 $project->update([
                     'number'=>$request->number,
                     'name'=>$request->name,
@@ -144,6 +95,10 @@ class ProjectsController extends BaseController
                     'link'=>$request->link,
                     'description'=>$request->description,
                 ]);
+                if($request->file('images'))
+                {
+                    $this->updateImages($project,$request->images);
+                }
                 $project->save();
                 $project= Project::with('images')->find($id);
                     
@@ -167,12 +122,13 @@ class ProjectsController extends BaseController
     public function destroy($id)
     {
         $errorMessage = [];
-        $projects = Project::find($id);
+        $project = Project::find($id);
 
-        if ($projects == null) {
+        if ($project == null) {
             return $this->sendError('the project does not exist', $errorMessage);
         }
-        $projects->delete();
+        $this-> deleteImages($project);
+        $project->delete();
         return $this->sendResponse(true, 'project delete successfully');
     }
 }

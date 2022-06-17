@@ -10,7 +10,11 @@ class Project extends Model
 {
     use HasFactory;
     protected $guarded=[];
-
+    /*
+    protected $casts = [
+        'images' => 'array',
+    ];
+    */
     public function images()
     {
         return $this->hasMany(Image::class);
