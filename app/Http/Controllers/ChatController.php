@@ -16,10 +16,13 @@ use Throwable;
 
 class ChatController extends BaseController
 {
-    //SEND MESSAGE 
+    //SEND MESSAGE  request:  user_id /message or attachment   response :
     public function sentMessage(Request $request)
     {
+       // return 'l';
         $user = Auth::user(); //sender
+       // return 'l';
+       /*
         $request->validate([
             'conversation_id' => [
                 Rule::requiredIf(function() use ($request) {
@@ -36,9 +39,11 @@ class ChatController extends BaseController
                 'exists:users,id',
             ],
         ]);
+        */
+        
         $conversation_id = $request->post('conversation_id');
         $user_id = $request->post('user_id');  //Receive 
-
+        
         DB::beginTransaction(); 
         try {
                 // by conversationID
@@ -59,8 +64,6 @@ class ChatController extends BaseController
                          ->where('participants2.user_id', '=', $user->id);
                          
              })->first();
-               
-
                  // not found conv with user
                 if (!$conversation) 
                 {
@@ -99,6 +102,7 @@ class ChatController extends BaseController
                 'body' => $message,
             ]); 
             //add receipents to message 
+            
             DB::statement('
                 INSERT INTO recipients (user_id, message_id)
                 SELECT user_id, ? FROM participants
@@ -130,7 +134,7 @@ class ChatController extends BaseController
 
             throw $e;
         }
-       // return $message;
+      // return $message;
        
        return $this->sendResponse($message, 'done send message Successfully!');
     }

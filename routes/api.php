@@ -22,7 +22,7 @@ Route::middleware('auth:sanctum')->group(function()
     Route::post('logout',[AuthController::class,'logout']);
     Route::post('change_password',[AuthController::class,'change_password']);
     Route::post('update_profile',[AuthController::class,'update_profile']);
-
+    Route::post('sentMessage',[ChatController::class,'sentMessage']);
 
 });
 Route::group([
