@@ -11,18 +11,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use App\Events\MessageCreated;
 use App\http\Controllers\BaseController as BaseController;
 use Throwable;
-
 class ChatController extends BaseController
 {
     //SEND MESSAGE  request:  user_id /message or attachment   response :
     public function sentMessage(Request $request)
     {
-       // return 'l';
-        $user = Auth::user(); //sender
-       // return 'l';
-       /*
+       
+        $user = Auth::user();
         $request->validate([
             'conversation_id' => [
                 Rule::requiredIf(function() use ($request) {
@@ -39,7 +37,7 @@ class ChatController extends BaseController
                 'exists:users,id',
             ],
         ]);
-        */
+        
         
         $conversation_id = $request->post('conversation_id');
         $user_id = $request->post('user_id');  //Receive 
@@ -119,15 +117,15 @@ class ChatController extends BaseController
             //$message->load('user');
             $message->load(['user'=>function($query)
         {
-            $query->select(['id','username','profile_image','role_as']);
+            $query->select(['id','username','email']);
         }]);
         $message->load(['recipients'=>function($query)
         {
-            $query->select(['profile_image']);
+            $query->select(['id','username','email']);
         }]);
             
 
-          //  event(new MessageCreated($message));
+       event(new MessageCreated($message));
 
         } catch (Throwable $e) {
             DB::rollBack();
@@ -148,7 +146,7 @@ class ChatController extends BaseController
             'lastMessage', 'participants' => function($builder) use ($user)
              {
                 $builder->where('id', '<>', $user->id);
-                $builder->select(['id','username','profile_image','role_as']);
+                $builder->select(['id','username']);
             },
             ])->withCount([
                 'recipients as new_messages' => function($builder) use ($user) {
@@ -164,14 +162,15 @@ class ChatController extends BaseController
     public function allMssageConvID($id)
     {
         $user=Auth::user();
-        $Conv=Conversation::where('user_id','=',$id)->first();
-        $ConversationID=$Conv->id; //error : Property [id] does not exist on the Eloquent builder instance  solve : first  = not get
+        $Conv=Conversation::where('id',$id)->first();
+        $ConversationID=$Conv->id;
+         //error : Property [id] does not exist on the Eloquent builder instance  solve : first  = not get
 
 
         $conversation = $user->conversations()
             ->with(['participants' => function($builder) use ($user) {
             $builder->where('id', '<>', $user->id);
-            $builder->select(['id','username','profile_image','role_as']);
+            $builder->select(['id','username']);
         }])
         ->findOrFail($ConversationID);
          
@@ -181,7 +180,7 @@ class ChatController extends BaseController
         }])
             ->with(['user'=>function($query)
             {
-                $query->select(['id','username','profile_image','role_as']);
+                $query->select(['id','username']);
             }])
             ->where(function($query) use ($user) {
                 $query 

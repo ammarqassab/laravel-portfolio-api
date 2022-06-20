@@ -45,9 +45,12 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+    /*
     Protected $appends=[
         'profile_image_url',
     ];
+    */
+    /* error :Column not found: 1054 Unknown column 'profile_image'
     public function getProfileImageUrlAttribute()
     {
         if ($this->profile_image)
@@ -58,7 +61,9 @@ class User extends Authenticatable
         {
             return 'https://ui-avatars.com/api/?background=random&name='.urldecode($this->name);
         }
+
     }
+    */
     public function conversations()
     {
         return $this->belongsToMany(Conversation::class, 'participants')

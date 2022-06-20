@@ -22,8 +22,11 @@ class UserSeeder extends Seeder
                 'username'=>$faker->firstname,
                 'role_as'=>'0',
                 'email'=>$faker->email,
+                'country'=>'syria',
+                'city'=>'damas',
+                'phone'=>'9639'.random_int(10000000,99999999),
                 'email_verified_at'=>Carbon::now(),
-                'password'=>bcrypt('12345678'),
+                'password'=>bcrypt('12345678'), 
                 'c_password'=>bcrypt('12345678'),
             ]);
         }

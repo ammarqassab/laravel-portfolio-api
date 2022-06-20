@@ -9,7 +9,8 @@ Trait ImagesTrait
     {
        foreach($request as $img)
        {
-         $image_name='img-'.$pro->name.'.'.$img->extension();
+         
+         $image_name=md5(microtime()).'_'.$pro->name.'.'.$img->extension();
         $img->move(public_path('/project_images'),$image_name);
         $image=Image::create(['path'=>$image_name,'project_id'=>$pro->id]);
         $image->save();
@@ -38,6 +39,7 @@ Trait ImagesTrait
           $img->delete();
        }
 }
+     
 
 }
 

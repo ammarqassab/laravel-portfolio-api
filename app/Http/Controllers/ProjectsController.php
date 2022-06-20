@@ -9,6 +9,7 @@ use App\Http\Controllers\BaseController as BaseController;
 use App\Traits\ImagesTrait;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Validator;
 use File;
 class ProjectsController extends BaseController
@@ -130,4 +131,19 @@ class ProjectsController extends BaseController
         $project->delete();
         return $this->sendResponse(true, 'project delete successfully');
     }
+    public function showImage($image_name)
+     {
+      $path=public_path().'/project_images/'.$image_name;
+      return Response::download($path);
+     }
+     public function showAllImage($proID)
+     {
+        $images=Image::select('path')->where('project_id',$proID)->get();
+        foreach($images as $img)
+        {
+      $path=public_path().'/project_images/'.$img->path;
+      $down=Response::download($path);
+        }
+        return $down;
+     }
 }
