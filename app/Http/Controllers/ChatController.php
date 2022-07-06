@@ -87,9 +87,7 @@ class ChatController extends BaseController
                     'file_name' => $file->getClientOriginalName(),
                     'file_size' => $file->getSize(),
                     'mimetype' => $file->getMimeType(),
-                    'file_path' => $file->store('attachments', [
-                        'disk' => 'public'
-                    ]),
+                    'file_path' => $file->move(public_path('/Chat_images'),$file->getClientOriginalName()),
                 ];
                 $type = 'attachment';
             }
@@ -221,10 +219,11 @@ class ChatController extends BaseController
                  'message'=>'all messages read'
              ];
          
+     } 
+     public function showImage($image_name)
+     {
+        $path=public_path().'/Chat_images/'.$image_name;
+        return Response::download($path);
      }
-    
-
-
-
 }
 

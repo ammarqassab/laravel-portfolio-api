@@ -19,10 +19,6 @@ Route::get('showAllProjects',[ProjectsController::class,'index']);
 Route::get('image/{image_name}',[ProjectsController::class,'showImage']);
 //Route::get('Allimage/{proID}',[ProjectsController::class,'showAllImage']);
 
-
-
-
-
 Route::middleware('auth:sanctum')->group(function()
 {
     Route::post('logout',[AuthController::class,'logout']);
@@ -37,6 +33,8 @@ Route::middleware('auth:sanctum')->group(function()
     Route::post('allMssageConvID/{id}',[ChatController::class,'allMssageConvID']);
     //markAsRead
     Route::post('markAsRead/{id}',[ChatController::class,'markAsRead']);
+    //image 
+    Route::get('imageChat/{image_name}',[ProjectsController::class,'showImage']);
 
 });
 Route::group([
