@@ -6,6 +6,7 @@ use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\Recipient;
 use App\Models\User;
+use Illuminate\Support\Facades\Response;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -84,15 +85,16 @@ class ChatController extends BaseController
             $type = 'text';
             $message = $request->post('message');
 
-            if ($request->hasFile('attachment')) {
-                $file = $request->file('attachment');
+            if ($request->hasFile('message')) {
+                $file = $request->file('message');
                 
                 $message = [
                     'file_name' => $file->getClientOriginalName(),
                     'file_size' => $file->getSize(),
                     'mimetype' => $file->getMimeType(),
-                    'file_path' => $file->move(public_path('/Chat_images'),$file->getClientOriginalName()),
+                    'file_path' =>md5(microtime()).'_'.$user->username.'.'.$file->extension(),
                 ];
+                $file->move(public_path('/Chat_images'),$message['file_path']);
                 $type = 'attachment';
             }
             //add message 
@@ -225,7 +227,7 @@ class ChatController extends BaseController
              ];
          
      } 
-     public function showImage($image_name)
+     public function showImageChat($image_name)
      {
         $path=public_path().'/Chat_images/'.$image_name;
         return Response::download($path);

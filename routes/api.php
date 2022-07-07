@@ -34,7 +34,7 @@ Route::middleware('auth:sanctum')->group(function()
     //markAsRead
     Route::post('markAsRead/{id}',[ChatController::class,'markAsRead']);
     //image 
-    Route::get('imageChat/{image_name}',[ProjectsController::class,'showImage']);
+    Route::get('imageChat/{image_name}',[ChatController::class,'showImageChat']);
 
 });
 Route::group([
