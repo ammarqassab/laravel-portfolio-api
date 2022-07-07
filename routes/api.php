@@ -18,6 +18,8 @@ Route::get('showProject/{id}',[ProjectsController::class,'show']);
 Route::get('showAllProjects',[ProjectsController::class,'index']);
 Route::get('image/{image_name}',[ProjectsController::class,'showImage']);
 //Route::get('Allimage/{proID}',[ProjectsController::class,'showAllImage']);
+//image 
+Route::get('imageChat/{image_name}',[ChatController::class,'showImageChat']);
 
 Route::middleware('auth:sanctum')->group(function()
 {
@@ -25,16 +27,13 @@ Route::middleware('auth:sanctum')->group(function()
     Route::post('change_password',[AuthController::class,'change_password']);
     Route::post('update_profile',[AuthController::class,'update_profile']);
 
-    
-
     //sentMessage
     Route::post('sentMessage',[ChatController::class,'sentMessage']);
     //ShowConvID
     Route::post('allMssageConvID/{id}',[ChatController::class,'allMssageConvID']);
     //markAsRead
     Route::post('markAsRead/{id}',[ChatController::class,'markAsRead']);
-    //image 
-    Route::get('imageChat/{image_name}',[ChatController::class,'showImageChat']);
+    
 
 });
 Route::group([
