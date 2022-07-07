@@ -16,6 +16,10 @@ use App\http\Controllers\BaseController as BaseController;
 use Throwable;
 class ChatController extends BaseController
 {
+    public function welcome($id)
+    {
+        
+    }
     //SEND MESSAGE  request:  user_id /message or attachment   response :
     public function sentMessage(Request $request)
     {
@@ -155,12 +159,13 @@ class ChatController extends BaseController
             return $this->sendResponse($conversation, 'All Conversations ');
 
     }
- 
+  
+   
     //get messages for conversationID
     public function allMssageConvID($id)
     {
         $user=Auth::user();
-        $Conv=Conversation::where('id',$id)->first();
+        $Conv=Conversation::where('user_id','=',$id)->first();
         $ConversationID=$Conv->id;
          //error : Property [id] does not exist on the Eloquent builder instance  solve : first  = not get
 
