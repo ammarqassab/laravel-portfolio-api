@@ -17,9 +17,38 @@ use App\http\Controllers\BaseController as BaseController;
 use Throwable;
 class ChatController extends BaseController
 {
-    public function welcome($id)
+    public function welcome($user)
     {
-        
+       
+        $admin=1;
+        $conversation = Conversation::create([
+            'user_id' =>$user,  //owner conversation
+        ]);
+       //add sender and receiver into participants 
+       // insert in many to many use attack 
+        $conversation->participants()->attach([
+            $admin => ['joined_at' => now()],  
+            $user => ['joined_at' => now()],
+        ]);
+        $type = 'text';
+        $message ='welcome';
+        $message = $conversation->messages()->create([
+            'user_id' =>$admin,
+            'type' => $type,
+            'body' => $message,
+        ]);
+        DB::statement('
+                INSERT INTO recipients (user_id, message_id)
+                SELECT user_id, ? FROM participants
+                WHERE conversation_id = ?
+                AND user_id <> ? ', 
+                [$message->id, $conversation->id,$admin]); 
+                $conversation->update([
+                'last_message_id' => $message->id,
+            ]);
+            
+            return response()->json([
+                'message'=>'register successfully and sent message welcome',],200);
     }
     //SEND MESSAGE  request:  user_id /message or attachment   response :
     public function sentMessage(Request $request)

@@ -35,8 +35,9 @@ class AuthController extends BaseController
         $input = $request->all();
         $input['password'] = Hash::make($input['password']);
         $user = User::create($input);
-     return response()->json([
-        'message'=>'register successfully',],200);
+        $id=$user->id;
+        return $message=app('App\Http\Controllers\ChatController')->welcome($id);
+    
     }
 
     public function login(Request $request)
