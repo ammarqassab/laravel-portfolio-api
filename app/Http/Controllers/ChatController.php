@@ -270,7 +270,13 @@ class ChatController extends BaseController
             
          $messages= Message::where('user_id', '=',$id)
             ->whereRaw('id IN (
-                SELECT message_id FROM recipients where read_at is null AND user_id=1)')->get();
+                SELECT message_id FROM recipients where read_at is null AND user_id=1)')->with(['recipients'=>function($query)
+                {
+                    $query->select(['user_id','read_at']);
+                }])->with(['user'=>function($query)
+                {
+                    $query->select(['id','username']);
+                }])->get();
                 $conversation = $user->conversations()
             ->with(['participants' => function($builder) use ($user) {
             $builder->where('id', '<>', $user->id);
@@ -290,7 +296,13 @@ class ChatController extends BaseController
            
             $messages=  Message::where('user_id', '=','1')
             ->whereRaw('id IN (
-                SELECT message_id FROM recipients where read_at is null AND user_id=?)',[$id])->get();
+                SELECT message_id FROM recipients where read_at is null AND user_id=?)',[$id])->with(['recipients'=>function($query)
+                {
+                    $query->select(['user_id','read_at']);
+                }])->with(['user'=>function($query)
+                {
+                    $query->select(['id','username']);
+                }])->get();
               //  return $messages->pluck('conversation_id');     //get a   [ { 'a':b}]
                 $conversation = $user->conversations()
                 ->with(['participants' => function($builder) use ($user) {
