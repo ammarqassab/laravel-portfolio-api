@@ -31,7 +31,7 @@ class ChatController extends BaseController
             $user => ['joined_at' => now()],
         ]);
         $type = 'text';
-        $message ='welcome';
+        $message ='welcome, how can we help you?';
         $message = $conversation->messages()->create([
             'user_id' =>$admin,
             'type' => $type,
@@ -260,6 +260,49 @@ class ChatController extends BaseController
      {
         $path=public_path().'/Chat_images/'.$image_name;
         return Response::download($path);
+     }
+     public function unread($id)
+     {
+        //token admin and id user  get message sented by this user and unread by admin 
+        if(auth()->user()->tokenCan('server:admin'))
+        {
+            $user=Auth::User();
+            
+         $messages= Message::where('user_id', '=',$id)
+            ->whereRaw('id IN (
+                SELECT message_id FROM recipients where read_at is null AND user_id=1)')->get();
+                $conversation = $user->conversations()
+            ->with(['participants' => function($builder) use ($user) {
+            $builder->where('id', '<>', $user->id);
+            $builder->select(['id','username']);
+        }])
+        ->findOrFail($messages->pluck('conversation_id'));
+                return [
+                    'conversation' => $conversation,
+                    'messages' => $messages,
+                ];
+             
+    }
+        //token user get message sent by admin  and unread by this user
+        if(auth()->user()->tokenCan('server:user'))
+        {
+            $user=Auth::User();
+           
+            $messages=  Message::where('user_id', '=','1')
+            ->whereRaw('id IN (
+                SELECT message_id FROM recipients where read_at is null AND user_id=?)',[$id])->get();
+              //  return $messages->pluck('conversation_id');     //get a   [ { 'a':b}]
+                $conversation = $user->conversations()
+                ->with(['participants' => function($builder) use ($user) {
+                $builder->where('id', '<>', $user->id);
+                $builder->select(['id','username']);
+            }])
+            ->findOrFail($messages->pluck('conversation_id'));
+                return [
+                    'conversation' => $conversation,
+                    'messages' => $messages,
+                ];
+        }
      }
 }
 

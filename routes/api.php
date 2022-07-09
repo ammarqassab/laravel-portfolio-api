@@ -12,7 +12,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::post('register',[AuthController::class,'register']);
-Route::post('welcome',[ChatController::class,'welcome']);
+//Route::post('welcome',[ChatController::class,'welcome']);
 Route::post('login',[AuthController::class,'login']);
 
 Route::get('showProject/{id}',[ProjectsController::class,'show']);
@@ -34,6 +34,7 @@ Route::middleware('auth:sanctum')->group(function()
     Route::post('allMssageConvID/{id}',[ChatController::class,'allMssageConvID']);
     //markAsRead
     Route::post('markAsRead/{id}',[ChatController::class,'markAsRead']);
+    Route::get('unread/{id}',[ChatController::class,'unread']);
     
 
 });
@@ -47,6 +48,7 @@ Route::post('updateProject/{id}',[ProjectsController::class,'update']);
 Route::post('deleteProject/{id}',[ProjectsController::class,'destroy']);
  //showAllConv 
  Route::get('shoWAllConv',[ChatController::class,'shoWAllConv']);
+
 });
 
 Route::middleware(['auth:sanctum' , 'CheckAdmin'])->group(function()
