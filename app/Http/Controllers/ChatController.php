@@ -303,8 +303,9 @@ class ChatController extends BaseController
                     'messages' => $messages,
                 ];
         }
-        return response()->json([
+      /*  return response()->json([
             'message'=>'NO MESSAGES',],200);
+            */
 }
 
      
