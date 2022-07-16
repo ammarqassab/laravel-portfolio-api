@@ -13,21 +13,21 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use App\Events\MessageCreated;
-use App\http\Controllers\BaseController as BaseController;
+use App\Http\Controllers\BaseController as BaseController;
 use Throwable;
 class ChatController extends BaseController
 {
     public function welcome($user)
     {
-       
+
         $admin=1;
         $conversation = Conversation::create([
             'user_id' =>$user,  //owner conversation
         ]);
-       //add sender and receiver into participants 
-       // insert in many to many use attack 
+       //add sender and receiver into participants
+       // insert in many to many use attack
         $conversation->participants()->attach([
-            $admin => ['joined_at' => now()],  
+            $admin => ['joined_at' => now()],
             $user => ['joined_at' => now()],
         ]);
         $type = 'text';
@@ -41,71 +41,71 @@ class ChatController extends BaseController
                 INSERT INTO recipients (user_id, message_id)
                 SELECT user_id, ? FROM participants
                 WHERE conversation_id = ?
-                AND user_id <> ? ', 
-                [$message->id, $conversation->id,$admin]); 
+                AND user_id <> ? ',
+                [$message->id, $conversation->id,$admin]);
                 $conversation->update([
                 'last_message_id' => $message->id,
             ]);
-            
+
             return response()->json([
                 'message'=>'register successfully and sent message welcome',],200);
     }
     //SEND MESSAGE  request:  user_id /message or attachment   response :
     public function sentMessage(Request $request)
     {
-       
+
         $user = Auth::user();
         $request->validate([
             'conversation_id' => [
                 Rule::requiredIf(function() use ($request) {
                     return !$request->input('user_id');
                 }),
-                'int', 
+                'int',
                 'exists:conversations,id',
             ],
             'user_id' => [
                 Rule::requiredIf(function() use ($request) {
                     return !$request->input('conversation_id');
                 }),
-                'int', 
+                'int',
                 'exists:users,id',
             ],
         ]);
-        
-        
+
+
         $conversation_id = $request->post('conversation_id');
-        $user_id = $request->post('user_id');  //Receive 
-        
-        DB::beginTransaction(); 
+        $user_id = $request->post('user_id');  //Receive
+
+        DB::beginTransaction();
         try {
                 // by conversationID
-            if ($conversation_id) 
+            if ($conversation_id)
             {
                 $conversation = $user->conversations()->findOrFail($conversation_id);
 
-            } 
-            else 
-            { 
+            }
+            else
+            {
                 // BY USERID
-                //check if u=sender and receive have conv 
+                //check if u=sender and receive have conv
                 //where has  relationship  condition on this relationship
                 $conversation = Conversation::whereHas('participants', function ($builder) use ($user_id, $user)
              {
                  $builder->join('participants as participants2','participants2.conversation_id', '=', 'participants.conversation_id')
                          ->where('participants.user_id', '=', $user_id)
                          ->where('participants2.user_id', '=', $user->id);
-                         
+
              })->first();
                  // not found conv with user
-                if (!$conversation) 
+                if (!$conversation)
                 {
                     $conversation = Conversation::create([
                         'user_id' => $user->id,  //owner conversation
                     ]);
-                   //add sender and receiver into participants 
-                   // insert in many to many use attack 
+                   //add sender and receiver into participants
+                   // insert in many to many use attack
                     $conversation->participants()->attach([
-                        $user->id => ['joined_at' => now()],  
+                        $user->id => ['joined_at' => now()],
                         $user_id => ['joined_at' => now()],
                     ]);
                 }
@@ -116,7 +116,7 @@ class ChatController extends BaseController
 
             if ($request->hasFile('message')) {
                 $file = $request->file('message');
-                
+
                 $message = [
                     'file_name' => $file->getClientOriginalName(),
                     'file_size' => $file->getSize(),
@@ -126,21 +126,21 @@ class ChatController extends BaseController
                 $file->move(public_path('/Chat_images'),$message['file_path']);
                 $type = 'attachment';
             }
-            //add message 
+            //add message
             $message = $conversation->messages()->create([
                 'user_id' => $user->id,
                 'type' => $type,
                 'body' => $message,
-            ]); 
-            //add receipents to message 
-            
+            ]);
+            //add receipents to message
+
             DB::statement('
                 INSERT INTO recipients (user_id, message_id)
                 SELECT user_id, ? FROM participants
                 WHERE conversation_id = ?
-                AND user_id <> ? 
+                AND user_id <> ?
             ', [$message->id, $conversation->id, $user->id]);
-               
+
             $conversation->update([
                 'last_message_id' => $message->id,
             ]);
@@ -156,7 +156,7 @@ class ChatController extends BaseController
         {
             $query->select(['id','username','email']);
         }]);
-            
+
 
        event(new MessageCreated($message));
 
@@ -166,7 +166,7 @@ class ChatController extends BaseController
             throw $e;
         }
       // return $message;
-       
+
        return $this->sendResponse($message, 'done send message Successfully!');
     }
 
@@ -190,8 +190,8 @@ class ChatController extends BaseController
             return $this->sendResponse($conversation, 'All Conversations ');
 
     }
-  
-   
+
+
     //get messages for conversationID
     public function allMssageConvID($id)
     {
@@ -207,7 +207,7 @@ class ChatController extends BaseController
             $builder->select(['id','username']);
         }])
         ->findOrFail($ConversationID);
-         
+
         $messages = $conversation->messages()->with(['recipients'=>function($query)
         {
             $query->select(['user_id','read_at']);
@@ -217,7 +217,7 @@ class ChatController extends BaseController
                 $query->select(['id','username']);
             }])
             ->where(function($query) use ($user) {
-                $query 
+                $query
                     ->where(function($query) use ($user) {
                         $query->where('user_id', $user->id)
                             ->whereNull('deleted_at');
@@ -242,7 +242,7 @@ class ChatController extends BaseController
      public function markAsRead($id)
      {
         $Conv=Conversation::where('user_id','=',$id)->first();
-        $ConversationID=$Conv->id; 
+        $ConversationID=$Conv->id;
         Recipient::where('user_id', '=', Auth::id())
              ->whereNull('read_at')
              ->whereRaw('message_id IN (
@@ -254,8 +254,8 @@ class ChatController extends BaseController
              return [
                  'message'=>'all messages read'
              ];
-         
-     } 
+
+     }
      public function showImageChat($image_name)
      {
         $path=public_path().'/Chat_images/'.$image_name;
@@ -263,11 +263,11 @@ class ChatController extends BaseController
      }
      public function unread($id)
      {
-        //token admin and id user  get message sented by this user and unread by admin 
+        //token admin and id user  get message sented by this user and unread by admin
         if(auth()->user()->tokenCan('server:admin'))
         {
             $user=Auth::User();
-            
+
          $messages= Message::where('user_id', '=',$id)
             ->whereRaw('id IN (
                 SELECT message_id FROM recipients where read_at is null AND user_id=1)')->with(['recipients'=>function($query)
@@ -287,13 +287,13 @@ class ChatController extends BaseController
                     'conversation' => $conversation,
                     'messages' => $messages,
                 ];
-             
+
     }
         //token user get message sent by admin  and unread by this user
         if(auth()->user()->tokenCan('server:user'))
         {
             $user=Auth::User();
-           
+
             $messages=  Message::where('user_id', '=','1')
             ->whereRaw('id IN (
                 SELECT message_id FROM recipients where read_at is null AND user_id=?)',[$id])->with(['recipients'=>function($query)
@@ -320,6 +320,6 @@ class ChatController extends BaseController
             */
 }
 
-     
+
      }
 

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\http\Controllers\BaseController as BaseController;
+use App\Http\Controllers\BaseController as BaseController;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -20,7 +20,7 @@ class AuthController extends BaseController
     {
         $validator = Validator::make($request->all(),
             [
-                
+
                 'username' => 'required|unique:users|max:30',
                 'email' => 'required|email',
                 'phone'=>'required',
@@ -37,7 +37,7 @@ class AuthController extends BaseController
         $user = User::create($input);
         $id=$user->id;
         return $message=app('App\Http\Controllers\ChatController')->welcome($id);
-    
+
     }
 
     public function login(Request $request)
@@ -77,25 +77,25 @@ class AuthController extends BaseController
 
         auth()->user()->tokens()->delete();
         return $this->sendResponse('Logout','USER logout Successfully!');
-        
+
     }
     public function change_password(Request $request)
     {
-            
+
         $validator=Validator::make($request->all(),
         [
             'old_password'=>'required',
             'password'=>'required',
             'confirm_password'=>'required|same:password'
         ]);
-        
+
         if($validator->fails())
         {
-         
+
           return response()->json([
               'message'=>'validations fails',
               'errors'=>$validator->errors() ],422);
-          
+
         }
         $user=$request->user();
         if (Hash::check($request->old_password,$user->password))
@@ -106,8 +106,8 @@ class AuthController extends BaseController
 
               return response()->json([
                 'message'=>'updated password successfully',],200);
-            
-          
+
+
         }
         else
         {
@@ -124,36 +124,36 @@ class AuthController extends BaseController
     {
                 $validator=Validator::make($request->all(),
                 [
-                    
+
                     'username' => 'required|unique:users|max:30',
                     'email' => 'required|email',
                     'phone'=>'required',
                     'country'=>'required',
                     'city'=>'required',
-                    
+
                 ]);
                 if ($validator->fails())
                 {
-                  
+
                     return response()->json([
                         'message'=>'validations fails',
                         'errors'=>$validator->errors() ],422);
-                    
+
                 }
                 $user=$request->user();
-               
-               
+
+
 
                 $user->update([
-                    
+
                     'username'=>$request->username,
                     'email'=>$request->email,
                     'phone'=>$request->phone,
                     'country'=>$request->country,
                     'city'=>$request->city,
-                    
+
                 ]);
                 return response()->json([
-                    'message'=>'updated profile successfully',],200);  
+                    'message'=>'updated profile successfully',],200);
     }
 }
