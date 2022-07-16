@@ -31,7 +31,7 @@ $user = User::create([
     'country'=>'syria',
     'city'=>'damascus',
     'email'=> 'ammar97@gmail.com',
-    'password'=> bcrypt('a1m9m9a7rqa3ss8ab'),
-    'c_password'=> bcrypt('a1m9m9a7rqa3ss8ab'), ]);
+    'password'=> bcrypt('32145678'),
+    'c_password'=> bcrypt('32145678'), ]);
 }
 }
