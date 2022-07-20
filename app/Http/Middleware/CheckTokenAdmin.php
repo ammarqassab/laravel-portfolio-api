@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 use Illuminate\Support\Facades\Auth;
 use Closure;
 use Illuminate\Http\Request;
+use App\Models\User;
 
 class CheckTokenAdmin
 {
@@ -16,17 +17,10 @@ class CheckTokenAdmin
      */
     public function handle(Request $request, Closure $next)
     {
+   // $role=User::Auth()->role_as;
 
 
-            if(auth()->user()->tokenCan('server:admin'))
-            {
-                return response()->json([
-                    'status'=>'200',
-                    'message'=>'Admin'
-                ]);
-            }
-
-            if(auth()->user()->tokenCan('server:user'))
+         if(auth()->user()->role_as==0)
 
             {
                 return response()->json([
@@ -35,6 +29,16 @@ class CheckTokenAdmin
                 ]);
 
             }
+
+          else
+            {
+                return response()->json([
+                    'status'=>'200',
+                    'message'=>'Admin'
+                ]);
+            }
+
+            
 
     }
 }
