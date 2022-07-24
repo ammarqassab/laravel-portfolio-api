@@ -156,4 +156,21 @@ class AuthController extends BaseController
                 return response()->json([
                     'message'=>'updated profile successfully',],200);
     }
+    public function ShowAllUser()
+    {
+        $user=User::where('role_as','0')->select('username','phone','email')->get();
+        return $this->sendResponse($user, 'All User');
+
+    }
+    public function DeleteAcount($id)
+    {
+        $user=User::find($id);
+        //return $user;
+        $user->conversations()->delete();
+        $user->delete();
+        return response()->json([
+            'message'=>'Account Deleted successfully',],200);
+    
+    }
+    
 }
