@@ -19,7 +19,7 @@ class CreateConversationsTable extends Migration
                 ->nullable()
                 ->constrained('users')
                 ->nullOnDelete();
-            $table->string('label')->nullable();
+            $table->text('label')->nullable();
             //$table->enum('type', ['peer', 'group'])->default('peer');
             $table->timestamps();
         });

@@ -15,7 +15,7 @@ class CreateImagesTable extends Migration
     {
         Schema::create('images', function (Blueprint $table) {
             $table->id();
-            $table->string('path')->nullable();
+            $table->text('path')->nullable();
 
             $table->foreignId('project_id')->nullable()->constrained('projects')->onDelete('cascade');
 

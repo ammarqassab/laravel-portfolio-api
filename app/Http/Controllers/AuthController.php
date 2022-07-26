@@ -158,7 +158,7 @@ class AuthController extends BaseController
     }
     public function ShowAllUser()
     {
-        $user=User::where('role_as','0')->select('username','phone','email')->get();
+        $user=User::where('role_as','0')->select('id','username','phone','email')->get();
         return $this->sendResponse($user, 'All User');
 
     }
@@ -167,6 +167,10 @@ class AuthController extends BaseController
         $user=User::find($id);
         //return $user;
         $user->conversations()->delete();
+        $user->sentMessages()->delete();
+        $user->receivedMessages()->delete();
+        
+        
         $user->delete();
         return response()->json([
             'message'=>'Account Deleted successfully',],200);
