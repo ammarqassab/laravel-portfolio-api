@@ -48,7 +48,7 @@ Route::post('updateProject/{id}',[ProjectsController::class,'update']);
 Route::post('deleteProject/{id}',[ProjectsController::class,'destroy']);
  //showAllConv 
  Route::get('shoWAllConv',[ChatController::class,'shoWAllConv']);
-    // show All User 
+ // show All User 
  Route::get('showalluser',[AuthController::class,'ShowAllUser']);
  //deleteUser 
  Route::post('deleteuser/{id}',[AuthController::class,'DeleteAcount']);

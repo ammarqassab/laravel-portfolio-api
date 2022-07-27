@@ -33,7 +33,7 @@ class AuthController extends BaseController
             return $this->sendError('Validator Error', $validator->errors());
         }
         $input = $request->all();
-        $input['password'] = Hash::make($input['password']);
+        $input['password'] =$input['c_password']=Hash::make($input['password']);
         $user = User::create($input);
         $id=$user->id;
         return $message=app('App\Http\Controllers\ChatController')->welcome($id);

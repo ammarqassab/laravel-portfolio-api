@@ -41,6 +41,7 @@ class ProjectsController extends BaseController
             'link'=>$request->link,
             'description'=>$request->description,
         ]);
+
         if($request->file('images'))
         {
             $this->storeImages($project,$request->images);
@@ -86,7 +87,10 @@ class ProjectsController extends BaseController
             if ($validator->fails()) {
                 return $this->sendError('validation error', $validator->errors());
             }
-        
+                 if($request->file('images'))
+                {
+                    $this->updateImages($project,$request->images);
+                }
 
                 $project->update([
                     'number'=>$request->number,
@@ -95,10 +99,7 @@ class ProjectsController extends BaseController
                     'link'=>$request->link,
                     'description'=>$request->description,
                 ]);
-                if($request->file('images'))
-                {
-                    $this->updateImages($project,$request->images);
-                }
+                
                 $project->save();
                 $project= Project::with('images')->find($id);
                     
@@ -112,6 +113,7 @@ class ProjectsController extends BaseController
 
         return $this->sendResponse($project,'project Update Successfully');
     }
+
 
     /**
      * Remove the specified resource from storage.
